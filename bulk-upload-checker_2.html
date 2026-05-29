@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Bulk Upload Checker — Wolt</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans','Segoe UI',sans-serif; background: #F5F7FA; color: #1A2233; min-height: 100vh; padding: 32px 16px; }
+.wrap { max-width: 740px; margin: 0 auto; }
+.header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.logo { background: #009DE0; border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+h1 { font-size: 21px; font-weight: 700; letter-spacing: -0.3px; }
+.subtitle { font-size: 13px; color: #6B7A99; margin-top: 2px; }
+hr { border: none; border-top: 1px solid #DDE3EC; margin: 20px 0; }
+.card { background: #fff; border-radius: 12px; border: 1px solid #DDE3EC; padding: 20px; margin-bottom: 14px; }
+.step-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.step-num { background: #009DE0; color: #fff; border-radius: 50%; width: 24px; height: 24px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+.step-title { font-weight: 600; font-size: 15px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #DDE3EC; font-size: 14px; background: #fff; color: #1A2233; outline: none; cursor: pointer; font-family: inherit; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7A99' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+select:focus { border-color: #009DE0; }
+.sel-label { font-size: 12px; font-weight: 600; color: #6B7A99; margin-bottom: 5px; letter-spacing: 0.3px; text-transform: uppercase; }
+.info-box { margin-top: 12px; padding: 12px 14px; border-radius: 8px; border-left: 3px solid #009DE0; font-size: 13px; line-height: 1.65; }
+.info-standard { background: #EEF7FD; border-color: #009DE0; color: #1A3A4A; }
+.info-multimodel { background: #FFF8E1; border-color: #F57C00; color: #3D2000; }
+.info-error { background: #FFEBEE; border-color: #E53935; color: #3D0000; }
+.info-row { margin-top: 6px; }
+.tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 4px; }
+.tag-venue { background: #E8F5E9; color: #2E7D32; }
+.tag-merchant { background: #FFF3E0; color: #E65100; }
+.tag-country { background: #EEF7FD; color: #01579B; }
+.hint-box { margin-top: 10px; padding: 11px 14px; background: #F8F9FB; border-radius: 8px; border: 1px solid #DDE3EC; font-size: 12px; }
+.hint-title { font-size: 11px; font-weight: 700; color: #6B7A99; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 7px; }
+.hint-col { font-family: monospace; font-size: 11.5px; background: #E3F2FD; padding: 2px 6px; border-radius: 3px; color: #0D47A1; display: inline-block; margin-bottom: 3px; }
+.hint-col.zero { background: #F3E5F5; color: #6A1B9A; }
+.ref-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #009DE0; text-decoration: none; padding: 4px 9px; border: 1px solid #B3DFF5; border-radius: 6px; background: #EEF7FD; margin-top: 8px; margin-right: 6px; }
+.ref-link:hover { background: #D6EFF9; }
+.drop-zone { border: 2px dashed #DDE3EC; border-radius: 10px; padding: 26px 20px; text-align: center; background: #fff; transition: all 0.2s; cursor: pointer; }
+.drop-zone:hover,.drop-zone.dragging { border-color: #009DE0; background: #EEF7FD; }
+.drop-icon { font-size: 26px; margin-bottom: 8px; }
+.drop-main { font-weight: 500; }
+.drop-sub { font-size: 12px; color: #6B7A99; margin-top: 4px; }
+.drop-zone.has-file .drop-main { color: #009DE0; font-weight: 600; }
+details summary { font-size: 13px; color: #6B7A99; cursor: pointer; margin-top: 10px; user-select: none; }
+textarea { width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px; border: 1.5px solid #DDE3EC; font-size: 12px; font-family: monospace; resize: vertical; outline: none; }
+.check-btn { width: 100%; padding: 13px; border-radius: 10px; border: none; background: #DDE3EC; color: #6B7A99; font-size: 15px; font-weight: 700; cursor: not-allowed; margin-bottom: 22px; letter-spacing: 0.3px; transition: background 0.15s; font-family: inherit; }
+.check-btn.ready { background: #009DE0; color: #fff; cursor: pointer; }
+.check-btn.ready:hover { background: #007BAF; }
+.summary-box { border-radius: 12px; padding: 16px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 16px; }
+.summary-pass { background: #E8F5E9; border: 1.5px solid #A5D6A7; }
+.summary-fail { background: #FFEBEE; border: 1.5px solid #FFCDD2; }
+.summary-icon { font-size: 30px; }
+.summary-title { font-weight: 700; font-size: 16px; }
+.s-pass { color: #2E7D32; } .s-fail { color: #E53935; }
+.summary-sub { font-size: 13px; color: #6B7A99; margin-top: 2px; }
+.cols-box { margin-bottom: 18px; background: #fff; border-radius: 10px; border: 1px solid #DDE3EC; overflow: hidden; }
+.cols-head { padding: 10px 15px; background: #F0F4FA; border-bottom: 1px solid #DDE3EC; font-size: 11.5px; font-weight: 700; color: #6B7A99; letter-spacing: 0.4px; text-transform: uppercase; }
+.cols-body { padding: 12px 15px; }
+.col-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.col-tick { font-size: 15px; line-height: 1.3; flex-shrink: 0; }
+.col-tick.ok { color: #2E7D32; } .col-tick.bad { color: #E53935; }
+code { padding: 2px 6px; border-radius: 4px; font-size: 11.5px; font-family: monospace; word-break: break-all; }
+code.ok { background: #F1F8E9; color: #33691E; }
+code.bad { background: #FFEBEE; color: #E53935; }
+code.zero { background: #F3E5F5; color: #6A1B9A; }
+.col-label { color: #6B7A99; font-size: 12px; margin-top: 2px; }
+.issue-group { margin-bottom: 14px; }
+.ig-lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.6px; margin-bottom: 7px; text-transform: uppercase; }
+.ig-error { color: #C62828; } .ig-warn { color: #E65100; }
+.issue-item { border-radius: 8px; padding: 9px 13px; margin-bottom: 5px; font-size: 13px; line-height: 1.5; }
+.ii-error { background: #FFEBEE; border: 1px solid #FFCDD2; }
+.ii-warn { background: #FFF8E1; border: 1px solid #FFE082; }
+.ic { font-weight: 700; margin-right: 4px; }
+.ic-e { color: #C62828; } .ic-w { color: #E65100; }
+.all-clear { text-align: center; padding: 24px 16px; color: #6B7A99; font-size: 14px; }
+.all-clear .big { font-size: 38px; margin-bottom: 8px; }
+.footer { margin-top: 28px; text-align: center; font-size: 12px; color: #6B7A99; line-height: 2; }
+.footer a { color: #009DE0; text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+#csv-input { display: none; }
+@media(max-width:520px){ .row2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo">✓</div>
+    <div>
+      <h1>Financial Bulk Upload Checker</h1>
+      <div class="subtitle">Validate your CSV before uploading to Ops Tools · Wolt Internal</div>
+    </div>
+  </div>
+  <hr>
+
+  <!-- Step 1 -->
+  <div class="card">
+    <div class="step-head"><div class="step-num">1</div><span class="step-title">Select commission type &amp; country</span></div>
+    <div class="row2">
+      <div>
+        <div class="sel-label">Commission type</div>
+        <select id="type-select" onchange="onSelChange()">
+          <option value="">— Choose type —</option>
+          <optgroup label="Standard commissions">
+            <option value="eat_in">Eat in purchase</option>
+            <option value="takeaway">Takeaway purchase</option>
+            <option value="delivery">Delivery purchase items</option>
+            <option value="self_delivery">Self-delivery purchase</option>
+            <option value="wolt_plus_delivery_pct_only">Wolt+ delivery purchase (% based fee ONLY)</option>
+            <option value="wolt_plus_self_delivery">Wolt+ self-delivery purchase</option>
+            <option value="in_store_payment">In-store payment</option>
+            <option value="card_commission">Card commission fee (HUN / EST / LVA / LTU)</option>
+            <option value="txn_fee_pct_only">Transaction fee / Platform fee (% based fee ONLY)</option>
+            <option value="txn_fee_flat_otf">Transaction fee — flat fee / OTF (DEU / ALB / SRB only)</option>
+            <option value="vat_flag">Take commission from full price (incl. VAT)</option>
+          </optgroup>
+          <optgroup label="Commissions with multiple monetization models">
+            <option value="txn_fee_switch_to_flat">Transaction fee — switching to flat fee (minor units)</option>
+            <option value="txn_fee_switch_to_pct">Transaction fee — switching to % based fee</option>
+            <option value="wolt_plus_switch_to_flat">Wolt+ delivery — switching to flat fee (minor units)</option>
+            <option value="wolt_plus_switch_to_pct">Wolt+ delivery — switching to % based fee</option>
+          </optgroup>
+        </select>
+      </div>
+      <div>
+        <div class="sel-label">Country</div>
+        <select id="country-select" onchange="onSelChange()">
+          <option value="">— Choose country —</option>
+          <option value="AUT">Austria (AUT) — EUR</option>
+          <option value="ALB">Albania (ALB) — ALL</option>
+          <option value="AZE">Azerbaijan (AZE) — AZN</option>
+          <option value="BIH">Bosnia &amp; Herzegovina (BIH) — BAM</option>
+          <option value="BGR">Bulgaria (BGR) — BGN</option>
+          <option value="HRV">Croatia (HRV) — EUR</option>
+          <option value="CYP">Cyprus (CYP) — EUR</option>
+          <option value="CZE">Czech Republic (CZE) — CZK</option>
+          <option value="DNK">Denmark (DNK) — DKK</option>
+          <option value="EST">Estonia (EST) — EUR</option>
+          <option value="FIN">Finland (FIN) — EUR</option>
+          <option value="GEO">Georgia (GEO) — GEL</option>
+          <option value="DEU">Germany (DEU) — EUR</option>
+          <option value="GRC">Greece (GRC) — EUR</option>
+          <option value="HUN">Hungary (HUN) — HUF</option>
+          <option value="ISR">Israel (ISR) — ILS</option>
+          <option value="JPN">Japan (JPN) — JPY</option>
+          <option value="KAZ">Kazakhstan (KAZ) — KZT</option>
+          <option value="KWT">Kuwait (KWT) — KWD</option>
+          <option value="LVA">Latvia (LVA) — EUR</option>
+          <option value="LTU">Lithuania (LTU) — EUR</option>
+          <option value="MKD">North Macedonia (MKD) — MKD</option>
+          <option value="NOR">Norway (NOR) — NOK</option>
+          <option value="POL">Poland (POL) — PLN</option>
+          <option value="QAT">Qatar (QAT) — QAR</option>
+          <option value="SAU">Saudi Arabia (SAU) — SAR</option>
+          <option value="SRB">Serbia (SRB) — RSD</option>
+          <option value="SVN">Slovenia (SVN) — EUR</option>
+          <option value="SVK">Slovakia (SVK) — EUR</option>
+          <option value="ESP">Spain (ESP) — EUR</option>
+          <option value="SWE">Sweden (SWE) — SEK</option>
+          <option value="UZB">Uzbekistan (UZB) — UZS</option>
+        </select>
+      </div>
+    </div>
+    <div id="type-info" style="display:none"></div>
+    <div id="col-hint" style="display:none"></div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="card">
+    <div class="step-head"><div class="step-num">2</div><span class="step-title">Upload your CSV file</span></div>
+    <div class="drop-zone" id="drop-zone"
+         onclick="document.getElementById('csv-input').click()"
+         ondragover="event.preventDefault();this.classList.add('dragging')"
+         ondragleave="this.classList.remove('dragging')"
+         ondrop="handleDrop(event)">
+      <div class="drop-icon">📂</div>
+      <div class="drop-main" id="drop-main">Drop your CSV here, or click to browse</div>
+      <div class="drop-sub" id="drop-sub">.csv files only</div>
+      <input id="csv-input" type="file" accept=".csv" onchange="handleFileInput(event)">
+    </div>
+    <details>
+      <summary>Or paste CSV content manually</summary>
+      <textarea id="csv-paste" rows="5" placeholder="Paste your CSV here..." oninput="onPaste()"></textarea>
+    </details>
+  </div>
+
+  <button class="check-btn" id="check-btn" onclick="runCheck()">🔍 Check my file</button>
+  <div id="results"></div>
+
+  <div class="footer">
+    Questions? <strong>#regtech-team</strong> in Slack &nbsp;·&nbsp;
+    <a href="https://woltwide.atlassian.net/wiki/spaces/FCG/pages/4360601865" target="_blank">📖 User Guide</a> &nbsp;·&nbsp;
+    <a href="https://woltwide.atlassian.net/wiki/spaces/FCG/pages/4360569035" target="_blank">📋 CSV Templates</a> &nbsp;·&nbsp;
+    <a href="https://woltwide.atlassian.net/wiki/spaces/FCG/pages/4638573421" target="_blank">💡 Transaction Fee Guide</a>
+  </div>
+</div>
+
+<script>
+// ── Country → currency ────────────────────────────────────────────────────────
+const COUNTRY_CURRENCY = {
+  AUT:'EUR',ALB:'ALL',AZE:'AZN',BIH:'BAM',BGR:'BGN',HRV:'EUR',CYP:'EUR',
+  CZE:'CZK',DNK:'DKK',EST:'EUR',FIN:'EUR',GEO:'GEL',DEU:'EUR',GRC:'EUR',
+  HUN:'HUF',ISR:'ILS',JPN:'JPY',KAZ:'KZT',KWT:'KWD',LVA:'EUR',LTU:'EUR',
+  MKD:'MKD',NOR:'NOK',POL:'PLN',QAT:'QAR',SAU:'SAR',SRB:'RSD',SVN:'EUR',
+  SVK:'EUR',ESP:'EUR',SWE:'SEK',UZB:'UZS'
+};
+
+// Countries where flat fee transaction fee is live
+const FLAT_FEE_TXN_COUNTRIES = ['DEU','ALB','SRB'];
+// Countries with card commission
+const CARD_COMMISSION_COUNTRIES = ['HUN','EST','LVA','LTU'];
+
+// ── Type definitions ──────────────────────────────────────────────────────────
+// col entry: { col, label, type, zeroOut }
+// type: 'id' | 'percent' | 'mustBeZero' | 'minorUnits' | 'currency' | 'boolean'
+// zeroOut: true = this col must be 0 (shown visually as zeroing out opposite model)
+
+const TYPES = {
+  // ── Standard ──────────────────────────────────────────────────────────────
+  eat_in: {
+    label: 'Eat in purchase',
+    group: 'standard',
+    venueLevel: false,
+    notes: 'Merchant level only.',
+    docSection: 'Eat in purchase',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.eat_in', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+    ]
+  },
+  takeaway: {
+    label: 'Takeaway purchase',
+    group: 'standard',
+    venueLevel: true,
+    notes: 'Supported at merchant and venue level.',
+    docSection: 'Takeaway purchase',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.takeaway', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+    ]
+  },
+  delivery: {
+    label: 'Delivery purchase items',
+    group: 'standard',
+    venueLevel: true,
+    notes: 'Supported at merchant and venue level.',
+    docSection: 'Delivery purchase items',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.delivery', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+    ]
+  },
+  self_delivery: {
+    label: 'Self-delivery purchase',
+    group: 'standard',
+    venueLevel: true,
+    notes: 'Supported at merchant and venue level.',
+    docSection: 'Self-delivery purchase',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.self_delivery', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+    ]
+  },
+  wolt_plus_delivery_pct_only: {
+    label: 'Wolt+ delivery purchase (% based fee ONLY)',
+    group: 'standard',
+    venueLevel: false,
+    notes: 'Merchant level only. % based fee only. If you need to switch the monetization model (e.g. from flat fee to %), use "Wolt+ delivery — switching to % based fee" under Multiple monetization models instead.',
+    docSection: 'Wolt+ delivery purchase (for % based fee ONLY)',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.wolt_plus_delivery', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+    ]
+  },
+  wolt_plus_self_delivery: {
+    label: 'Wolt+ self-delivery purchase',
+    group: 'standard',
+    venueLevel: false,
+    notes: 'Merchant level only.',
+    docSection: 'Wolt+ self-delivery purchase',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.wolt_plus_self_delivery', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+    ]
+  },
+  in_store_payment: {
+    label: 'In-store payment',
+    group: 'standard',
+    venueLevel: true,
+    notes: 'Supported at merchant and venue level.',
+    docSection: 'In-store payment',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.in_store_payment', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+    ]
+  },
+  card_commission: {
+    label: 'Card commission fee',
+    group: 'standard',
+    venueLevel: false,
+    notes: 'Merchant level only.',
+    countryRestriction: CARD_COMMISSION_COUNTRIES,
+    countryRestrictionMsg: 'Card commission fee is only used in HUN, EST, LVA, LTU.',
+    docSection: 'Card commission fee (used in HUN, EST, LVA, LTU)',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.card_commission', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+    ]
+  },
+  txn_fee_pct_only: {
+    label: 'Transaction fee / Platform fee (% based fee ONLY)',
+    group: 'standard',
+    venueLevel: true,
+    notes: 'Supported at merchant and venue level. % based fee only. If you need to switch the monetization model (e.g. from flat fee to %), use "Transaction fee — switching to % based fee" under Multiple monetization models instead.',
+    docSection: 'Transaction fee/ Platform fee (for % based fee ONLY)',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.transaction_fee', label:'Commission % as decimal (e.g. 0.02 = 2%)', type:'percent'},
+    ]
+  },
+  txn_fee_flat_otf: {
+    label: 'Transaction fee — flat fee / OTF',
+    group: 'standard',
+    venueLevel: true,
+    countryRestriction: FLAT_FEE_TXN_COUNTRIES,
+    countryRestrictionMsg: 'Flat fee / OTF transaction fee is only live in DEU, ALB, SRB. Do not use for other countries.',
+    notes: 'DEU, ALB, SRB only. Use this when setting a flat (one-time) transaction fee. 3-column format — no % column needed. Amount must be in minor units (e.g. €0.49 = 49, €1.25 = 125). Currency must match the country.',
+    docSection: 'Transaction fee flat fee (OTF)',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.flatFeeCommissions.transaction_fee.amount_minor_units', label:'Flat fee in minor units — e.g. €0.49 = 49, €1.25 = 125', type:'minorUnits'},
+      {col:'payload.commissions.flatFeeCommissions.transaction_fee.currency_code', label:'Currency code matching country — EUR for DEU, ALL for ALB, RSD for SRB', type:'currency'},
+    ]
+  },
+  vat_flag: {
+    label: 'Take commission from full price (incl. VAT)',
+    group: 'standard',
+    venueLevel: false,
+    notes: 'Merchant level only.',
+    docSection: 'Take commission from full price that includes VAT',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.takeCommissionFromFullPrice', label:'true or false', type:'boolean'},
+    ]
+  },
+
+  // ── Multiple monetization models ──────────────────────────────────────────
+  // All 4 variants use the SAME 4-column template.
+  // The difference is which field has a real value and which is zeroed out.
+
+  txn_fee_switch_to_flat: {
+    label: 'Transaction fee — switching to flat fee',
+    group: 'multimodel',
+    venueLevel: true,
+    countryRestriction: FLAT_FEE_TXN_COUNTRIES,
+    countryRestrictionMsg: 'Flat fee transaction fee is only live in DEU, ALB, SRB.',
+    notes: 'Use this when switching the transaction fee from % based to flat fee, OR when the entity is already on flat fee and you are updating the flat fee amount. The % column must be included and set to 0.',
+    docSection: 'Commissions with multiple monetization models',
+    docLink: 'https://woltwide.atlassian.net/wiki/spaces/FCG/pages/4638573421',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.transaction_fee', label:'Must be 0 — zeroing out % fee', type:'mustBeZero', zeroOut:true},
+      {col:'payload.commissions.flatFeeCommissions.transaction_fee.amount_minor_units', label:'Flat fee in minor units — e.g. €1.25 = 125, €0.49 = 49', type:'minorUnits'},
+      {col:'payload.commissions.flatFeeCommissions.transaction_fee.currency_code', label:'Currency code matching country — always required', type:'currency'},
+    ]
+  },
+  txn_fee_switch_to_pct: {
+    label: 'Transaction fee — switching to % based fee',
+    group: 'multimodel',
+    venueLevel: true,
+    notes: 'Use this when switching the transaction fee from flat fee to % based, OR when the entity is already on % and you are updating the rate. The flat fee columns must be included and both set to 0.',
+    docSection: 'Commissions with multiple monetization models',
+    docLink: 'https://woltwide.atlassian.net/wiki/spaces/FCG/pages/4638573421',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.transaction_fee', label:'Commission % as decimal (e.g. 0.02 = 2%)', type:'percent'},
+      {col:'payload.commissions.flatFeeCommissions.transaction_fee.amount_minor_units', label:'Must be 0 — zeroing out flat fee', type:'mustBeZero', zeroOut:true},
+      {col:'payload.commissions.flatFeeCommissions.transaction_fee.currency_code', label:'Currency code — required even when amount is 0', type:'currency'},
+    ]
+  },
+  wolt_plus_switch_to_flat: {
+    label: 'Wolt+ delivery — switching to flat fee',
+    group: 'multimodel',
+    venueLevel: false,
+    notes: 'Merchant level only. Use this when switching Wolt+ delivery from % based to flat fee, OR when updating an existing flat fee amount. The % column must be included and set to 0.',
+    docSection: 'Commissions with multiple monetization models',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.wolt_plus_delivery', label:'Must be 0 — zeroing out % fee', type:'mustBeZero', zeroOut:true},
+      {col:'payload.commissions.flatFeeCommissions.wolt_plus_delivery.amount_minor_units', label:'Flat fee in minor units — e.g. 49 = €0.49', type:'minorUnits'},
+      {col:'payload.commissions.flatFeeCommissions.wolt_plus_delivery.currency_code', label:'Currency code matching country — always required', type:'currency'},
+    ]
+  },
+  wolt_plus_switch_to_pct: {
+    label: 'Wolt+ delivery — switching to % based fee',
+    group: 'multimodel',
+    venueLevel: false,
+    notes: 'Merchant level only. Use this when switching Wolt+ delivery from flat fee to % based, OR when updating an existing % rate. The flat fee columns must be included and both set to 0.',
+    docSection: 'Commissions with multiple monetization models',
+    cols: [
+      {col:'header.entity_id', label:'Entity ID', type:'id'},
+      {col:'payload.commissions.purchaseCommissions.wolt_plus_delivery', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+      {col:'payload.commissions.flatFeeCommissions.wolt_plus_delivery.amount_minor_units', label:'Must be 0 — zeroing out flat fee', type:'mustBeZero', zeroOut:true},
+      {col:'payload.commissions.flatFeeCommissions.wolt_plus_delivery.currency_code', label:'Currency code — required even when amount is 0', type:'currency'},
+    ]
+  },
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let csvContent = '', fileName = '';
+
+function onSelChange() { updateInfo(); updateBtn(); document.getElementById('results').innerHTML = ''; }
+
+function updateInfo() {
+  const typeKey = document.getElementById('type-select').value;
+  const country = document.getElementById('country-select').value;
+  const infoEl = document.getElementById('type-info');
+  const hintEl = document.getElementById('col-hint');
+  if (!typeKey) { infoEl.style.display='none'; hintEl.style.display='none'; return; }
+
+  const def = TYPES[typeKey];
+  const currency = country ? COUNTRY_CURRENCY[country] : null;
+  const isMultiModel = def.group === 'multimodel';
+  const countryBlocked = def.countryRestriction && country && !def.countryRestriction.includes(country);
+
+  // Info box
+  let cls = countryBlocked ? 'info-box info-error' : isMultiModel ? 'info-box info-multimodel' : 'info-box info-standard';
+  let html = `<strong>${def.label}</strong>`;
+  html += `<div class="info-row">`;
+  html += def.venueLevel
+    ? `<span class="tag tag-venue">✓ Venue level supported</span>`
+    : `<span class="tag tag-merchant">⛔ Merchant level only</span>`;
+  if (def.countryRestriction) {
+    html += ` <span class="tag tag-country">🌍 ${def.countryRestriction.join(', ')} only</span>`;
+  }
+  html += `</div>`;
+  html += `<div class="info-row" style="margin-top:5px">${def.notes}</div>`;
+
+  if (countryBlocked) {
+    html += `<div class="info-row" style="color:#C62828;font-weight:600;margin-top:6px;">🚫 ${def.countryRestrictionMsg}</div>`;
+  }
+  if (currency) {
+    html += `<div class="info-row" style="margin-top:6px;">💱 Expected currency for ${country}: <strong>${currency}</strong></div>`;
+  }
+  if (isMultiModel) {
+    html += `<div class="info-row" style="margin-top:8px;font-weight:600;">⚠️ Important: all 4 columns must be present. Zero out the opposite model — the value in purple below must be exactly 0.</div>`;
+  }
+
+  // Reference links
+  html += `<div style="margin-top:10px">`;
+  html += `<a class="ref-link" href="https://woltwide.atlassian.net/wiki/spaces/FCG/pages/4360569035" target="_blank">📋 CSV Templates page</a>`;
+  if (def.docLink) {
+    html += `<a class="ref-link" href="${def.docLink}" target="_blank">💡 ${def.docSection}</a>`;
+  }
+  html += `</div>`;
+
+  infoEl.className = cls;
+  infoEl.innerHTML = html;
+  infoEl.style.display = 'block';
+
+  // Column hint
+  let hHtml = `<div class="hint-title">Expected columns for this type</div>`;
+  def.cols.forEach(c => {
+    const zc = c.zeroOut ? ' zero' : '';
+    hHtml += `<div style="margin-bottom:4px"><span class="hint-col${zc}">${c.col}</span>`;
+    if (c.zeroOut) hHtml += ` <span style="font-size:11px;color:#6A1B9A;font-weight:600">← must be 0</span>`;
+    hHtml += `</div>`;
+  });
+  hintEl.innerHTML = hHtml;
+  hintEl.className = 'hint-box';
+  hintEl.style.display = 'block';
+}
+
+function updateBtn() {
+  const ready = document.getElementById('type-select').value && document.getElementById('country-select').value && csvContent;
+  document.getElementById('check-btn').className = 'check-btn' + (ready ? ' ready' : '');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('dragging');
+  loadFile(e.dataTransfer.files[0]);
+}
+function handleFileInput(e) { loadFile(e.target.files[0]); }
+function loadFile(file) {
+  if (!file) return;
+  fileName = file.name;
+  const r = new FileReader();
+  r.onload = e => {
+    csvContent = e.target.result;
+    document.getElementById('drop-zone').classList.add('has-file');
+    document.getElementById('drop-main').textContent = file.name;
+    document.getElementById('drop-sub').textContent = 'Click or drop to replace';
+    updateBtn();
+    document.getElementById('results').innerHTML = '';
+  };
+  r.readAsText(file);
+}
+function onPaste() {
+  csvContent = document.getElementById('csv-paste').value;
+  fileName = 'pasted content';
+  updateBtn();
+  document.getElementById('results').innerHTML = '';
+}
+
+// ── CSV parse ─────────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n').map(l => l.replace(/\r$/,''));
+  if (lines.length < 2) return {headers:[], rows:[]};
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+  const rows = lines.slice(1).filter(l => l.trim()).map(line => {
+    const vals = []; let cur = '', inQ = false;
+    for (const ch of line) {
+      if (ch==='"') { inQ=!inQ; }
+      else if (ch===',' && !inQ) { vals.push(cur.trim()); cur=''; }
+      else cur += ch;
+    }
+    vals.push(cur.trim());
+    const row = {};
+    headers.forEach((h,i) => row[h] = (vals[i]||'').replace(/^"|"$/g,''));
+    return row;
+  });
+  return {headers, rows};
+}
+
+// ── Value validation ──────────────────────────────────────────────────────────
+function validateVal(value, type) {
+  const errs = [];
+  const v = String(value||'').trim();
+
+  if (type === 'id') {
+    if (!v) errs.push('Empty — entity ID is required');
+  } else if (type === 'percent') {
+    if (!v) { errs.push('Empty — required'); return errs; }
+    const n = parseFloat(v);
+    if (isNaN(n)) errs.push(`"${v}" is not a number — expected decimal like 0.15 for 15%`);
+    else if (n > 1) errs.push(`Value ${v} looks like a whole percentage — must be decimal (e.g. use ${(n/100).toFixed(4)} for ${n}%)`);
+    else if (n < 0) errs.push('Negative value not allowed');
+  } else if (type === 'mustBeZero') {
+    if (!v && v !== '0') { errs.push('Empty — must be 0 to zero out the opposite model'); return errs; }
+    const n = Number(v);
+    if (isNaN(n)) errs.push(`"${v}" must be 0 — this column zeros out the opposite monetization model`);
+    else if (n !== 0) errs.push(`Value must be 0 — this column zeros out the opposite model (got ${v})`);
+  } else if (type === 'minorUnits') {
+    if (!v) { errs.push('Empty — required'); return errs; }
+    const n = Number(v);
+    if (isNaN(n)) errs.push(`"${v}" is not a number — must be an integer in minor units`);
+    else if (!Number.isInteger(n)) errs.push(`Decimals not allowed — use whole minor units (e.g. €1.25 = 125, €0.49 = 49)`);
+    else if (n < 0) errs.push('Negative value not allowed');
+    else if (n === 0) errs.push('Value is 0 — if you intend to zero out the flat fee, use the "switching to %" type instead');
+  } else if (type === 'currency') {
+    if (!v) errs.push('Empty — currency code is required, even when amount is 0');
+    else if (!/^[A-Z]{3}$/.test(v)) errs.push(`"${v}" is not a valid currency code — use 3 uppercase letters (e.g. EUR, DKK, RSD)`);
+  } else if (type === 'boolean') {
+    if (!['true','false','TRUE','FALSE','1','0'].includes(v)) errs.push(`"${v}" is not valid — use true or false`);
+  }
+  return errs;
+}
+
+// ── Main check ────────────────────────────────────────────────────────────────
+function runCheck() {
+  const typeKey = document.getElementById('type-select').value;
+  const country = document.getElementById('country-select').value;
+  if (!typeKey || !country || !csvContent) return;
+
+  const def = TYPES[typeKey];
+  const {headers, rows} = parseCSV(csvContent);
+  const expectedCurrency = COUNTRY_CURRENCY[country];
+  const issues = [];
+
+  // 0. Country restriction
+  if (def.countryRestriction && !def.countryRestriction.includes(country)) {
+    issues.push({level:'error', code:'COUNTRY_NOT_SUPPORTED',
+      msg:`${def.label} is not supported in ${country}. Only available in: ${def.countryRestriction.join(', ')}.`});
+  }
+
+  // 1. Missing required columns
+  const requiredCols = def.cols.map(c => c.col);
+  const missing = requiredCols.filter(c => !headers.includes(c));
+  if (missing.length) {
+    issues.push({level:'error', code:'MISSING_COLUMNS',
+      msg:`Missing required column(s):\n${missing.map(c => `  • "${c}"`).join('\n')}`});
+  }
+
+  // 2. Extra columns
+  const expectedSet = new Set(requiredCols);
+  const extra = headers.filter(h => !expectedSet.has(h));
+  if (extra.length) {
+    issues.push({level:'warning', code:'EXTRA_COLUMNS',
+      msg:`Unexpected column(s) for this type: ${extra.map(c => `"${c}"`).join(', ')}`});
+  }
+
+  // 3. Row-level checks
+  rows.forEach((row, idx) => {
+    const rowNum = idx + 2;
+
+    def.cols.forEach(colDef => {
+      if (!headers.includes(colDef.col)) return;
+      validateVal(row[colDef.col], colDef.type).forEach(e => {
+        issues.push({level:'error', code:'INVALID_VALUE',
+          msg:`Row ${rowNum}, "${colDef.col}": ${e}`});
+      });
+    });
+
+    // Currency must match country
+    def.cols.filter(c => c.type === 'currency').forEach(colDef => {
+      if (!headers.includes(colDef.col)) return;
+      const val = (row[colDef.col]||'').trim();
+      if (val && val !== expectedCurrency) {
+        issues.push({level:'error', code:'CURRENCY_MISMATCH',
+          msg:`Row ${rowNum}: currency "${val}" does not match ${country} — expected ${expectedCurrency}`});
+      }
+    });
+
+    // Minor units sanity: suspiciously small (likely entered full currency amount instead of minor units)
+    def.cols.filter(c => c.type === 'minorUnits').forEach(colDef => {
+      if (!headers.includes(colDef.col)) return;
+      const n = Number(row[colDef.col]);
+      if (!isNaN(n) && n > 0 && n < 10) {
+        issues.push({level:'warning', code:'SUSPICIOUS_MINOR_UNITS',
+          msg:`Row ${rowNum}: flat fee value ${n} is very small — did you enter ${n} ${expectedCurrency} instead of minor units? e.g. €0.49 should be 49, €1.00 should be 100.`});
+      }
+    });
+  });
+
+  // 4. Duplicate IDs
+  const ids = rows.map(r => (r['header.entity_id']||'').trim()).filter(Boolean);
+  const seen = {};
+  ids.forEach((id, i) => {
+    if (seen[id] !== undefined) {
+      issues.push({level:'warning', code:'DUPLICATE_ID',
+        msg:`Duplicate entity_id "${id}" in rows ${seen[id]+2} and ${i+2}`});
+    } else seen[id] = i;
+  });
+
+  // 5. Mixed ID lengths (possible merchant/venue mix)
+  const lengths = [...new Set(ids.map(id => id.length))];
+  if (lengths.length > 1) {
+    issues.push({level:'warning', code:'MIXED_ID_LENGTHS',
+      msg:`Entity IDs have varying lengths (${lengths.join(', ')} chars) — possible mix of merchant and venue IDs. The tool requires one type only per upload.`});
+  }
+
+  renderResults(def, headers, rows.length, issues, country, expectedCurrency);
+}
+
+function renderResults(def, headers, rowCount, issues, country, expectedCurrency) {
+  const errors = issues.filter(i => i.level==='error');
+  const warnings = issues.filter(i => i.level==='warning');
+  const passed = errors.length === 0;
+
+  let html = `
+    <div class="summary-box ${passed?'summary-pass':'summary-fail'}">
+      <div class="summary-icon">${passed?'✅':'❌'}</div>
+      <div>
+        <div class="summary-title ${passed?'s-pass':'s-fail'}">
+          ${passed ? 'Looking good! No errors found.' : `${errors.length} error${errors.length!==1?'s':''} found`}
+        </div>
+        <div class="summary-sub">${rowCount} rows checked &nbsp;·&nbsp; ${headers.length} columns &nbsp;·&nbsp; ${warnings.length} warning${warnings.length!==1?'s':''}
+          ${passed&&warnings.length===0?' &nbsp;·&nbsp; File looks ready to upload!':''}</div>
+      </div>
+    </div>
+
+    <div class="cols-box">
+      <div class="cols-head">Column check — ${esc(def.label)}</div>
+      <div class="cols-body">
+        ${def.cols.map(colDef => {
+          const present = headers.includes(colDef.col);
+          const isZero = colDef.zeroOut;
+          return `<div class="col-row">
+            <span class="col-tick ${present?'ok':'bad'}">${present?'✓':'✗'}</span>
+            <div>
+              <code class="${present?(isZero?'zero':'ok'):'bad'}">${esc(colDef.col)}</code>
+              ${isZero?'<span style="font-size:11px;color:#6A1B9A;font-weight:600;margin-left:4px">← must be 0</span>':''}
+              <div class="col-label">${esc(colDef.label)}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  if (errors.length) {
+    html += `<div class="issue-group">
+      <div class="ig-lbl ig-error">⛔ Errors — must fix before uploading</div>
+      ${errors.map(i=>`<div class="issue-item ii-error"><span class="ic ic-e">[${i.code}]</span> ${esc(i.msg).replace(/\n/g,'<br>&nbsp;&nbsp;')}</div>`).join('')}
+    </div>`;
+  }
+  if (warnings.length) {
+    html += `<div class="issue-group">
+      <div class="ig-lbl ig-warn">⚠️ Warnings — review before uploading</div>
+      ${warnings.map(i=>`<div class="issue-item ii-warn"><span class="ic ic-w">[${i.code}]</span> ${esc(i.msg)}</div>`).join('')}
+    </div>`;
+  }
+  if (passed && warnings.length===0) {
+    html += `<div class="all-clear"><div class="big">🎉</div>No issues found. File looks ready!<br><span style="font-size:12px">Remember: test in the development environment first.</span></div>`;
+  }
+
+  document.getElementById('results').innerHTML = html;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
