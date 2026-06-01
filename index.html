@@ -270,7 +270,7 @@ const TYPES = {
     docSection: 'Wolt+ delivery purchase (for % based fee ONLY)',
     cols: [
       {col:'header.entity_id', label:'Entity ID', type:'id'},
-      {col:'payload.commissions.purchaseCommissions.wolt_plus_delivery', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+      {col:'payload.commissions.purchaseCommissions.wolt_plus_extra', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
     ]
   },
   wolt_plus_self_delivery: {
@@ -281,7 +281,7 @@ const TYPES = {
     docSection: 'Wolt+ self-delivery purchase',
     cols: [
       {col:'header.entity_id', label:'Entity ID', type:'id'},
-      {col:'payload.commissions.purchaseCommissions.wolt_plus_self_delivery', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+      {col:'payload.commissions.purchaseCommissions.self_delivery_subscription', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
     ]
   },
   in_store_payment: {
@@ -292,7 +292,7 @@ const TYPES = {
     docSection: 'In-store payment',
     cols: [
       {col:'header.entity_id', label:'Entity ID', type:'id'},
-      {col:'payload.commissions.purchaseCommissions.in_store_payment', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+      {col:'payload.commissions.paymentCommissions.in_store_payment', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
     ]
   },
   card_commission: {
@@ -305,7 +305,7 @@ const TYPES = {
     docSection: 'Card commission fee (used in HUN, EST, LVA, LTU)',
     cols: [
       {col:'header.entity_id', label:'Entity ID', type:'id'},
-      {col:'payload.commissions.purchaseCommissions.card_commission', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+      {col:'payload.commissions.paymentMethodCommissions.card', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
     ]
   },
   txn_fee_pct_only: {
@@ -341,7 +341,7 @@ const TYPES = {
     docSection: 'Take commission from full price that includes VAT',
     cols: [
       {col:'header.entity_id', label:'Entity ID', type:'id'},
-      {col:'payload.commissions.takeCommissionFromFullPrice', label:'true or false', type:'boolean'},
+      {col:'payload.commissions.commissionIncludesVat', label:'true or false', type:'boolean'},
     ]
   },
 
@@ -387,9 +387,9 @@ const TYPES = {
     docSection: 'Commissions with multiple monetization models',
     cols: [
       {col:'header.entity_id', label:'Entity ID', type:'id'},
-      {col:'payload.commissions.purchaseCommissions.wolt_plus_delivery', label:'Must be 0 — zeroing out % fee', type:'mustBeZero', zeroOut:true},
-      {col:'payload.commissions.flatFeeCommissions.wolt_plus_delivery.amount_minor_units', label:'Flat fee in minor units — e.g. 49 = €0.49', type:'minorUnits'},
-      {col:'payload.commissions.flatFeeCommissions.wolt_plus_delivery.currency_code', label:'Currency code matching country — always required', type:'currency'},
+      {col:'payload.commissions.purchaseCommissions.wolt_plus_extra', label:'Must be 0 — zeroing out % fee', type:'mustBeZero', zeroOut:true},
+      {col:'payload.commissions.flatFeeCommissions.wolt_plus.amount_minor_units', label:'Flat fee in minor units — e.g. 49 = €0.49', type:'minorUnits'},
+      {col:'payload.commissions.flatFeeCommissions.wolt_plus.currency_code', label:'Currency code matching country — always required', type:'currency'},
     ]
   },
   wolt_plus_switch_to_pct: {
@@ -400,9 +400,9 @@ const TYPES = {
     docSection: 'Commissions with multiple monetization models',
     cols: [
       {col:'header.entity_id', label:'Entity ID', type:'id'},
-      {col:'payload.commissions.purchaseCommissions.wolt_plus_delivery', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
-      {col:'payload.commissions.flatFeeCommissions.wolt_plus_delivery.amount_minor_units', label:'Must be 0 — zeroing out flat fee', type:'mustBeZero', zeroOut:true},
-      {col:'payload.commissions.flatFeeCommissions.wolt_plus_delivery.currency_code', label:'Currency code — required even when amount is 0', type:'currency'},
+      {col:'payload.commissions.purchaseCommissions.wolt_plus_extra', label:'Commission % as decimal (e.g. 0.15 = 15%)', type:'percent'},
+      {col:'payload.commissions.flatFeeCommissions.wolt_plus.amount_minor_units', label:'Must be 0 — zeroing out flat fee', type:'mustBeZero', zeroOut:true},
+      {col:'payload.commissions.flatFeeCommissions.wolt_plus.currency_code', label:'Currency code — required even when amount is 0', type:'currency'},
     ]
   },
 };
