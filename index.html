@@ -112,7 +112,7 @@ code.zero { background: #F3E5F5; color: #6A1B9A; }
             <option value="in_store_payment">In-store payment</option>
             <option value="card_commission">Card commission fee (HUN / EST / LVA / LTU)</option>
             <option value="txn_fee_pct_only">Transaction fee / Platform fee (% based fee ONLY)</option>
-            <option value="txn_fee_flat_otf">Transaction fee — flat fee / OTF (DEU / ALB / SRB only)</option>
+            <option value="txn_fee_flat_otf">Transaction fee — flat fee / OTF (DEU / ALB / SRB / AUT / BGR — XKX soon)</option>
             <option value="vat_flag">Take commission from full price (incl. VAT)</option>
           </optgroup>
           <optgroup label="Commissions with multiple monetization models">
@@ -130,8 +130,7 @@ code.zero { background: #F3E5F5; color: #6A1B9A; }
           <option value="AUT">Austria (AUT) — EUR</option>
           <option value="ALB">Albania (ALB) — ALL</option>
           <option value="AZE">Azerbaijan (AZE) — AZN</option>
-          <option value="BIH">Bosnia &amp; Herzegovina (BIH) — BAM</option>
-          <option value="BGR">Bulgaria (BGR) — BGN</option>
+          <option value="BGR">Bulgaria (BGR) — EUR</option>
           <option value="HRV">Croatia (HRV) — EUR</option>
           <option value="CYP">Cyprus (CYP) — EUR</option>
           <option value="CZE">Czech Republic (CZE) — CZK</option>
@@ -143,22 +142,17 @@ code.zero { background: #F3E5F5; color: #6A1B9A; }
           <option value="GRC">Greece (GRC) — EUR</option>
           <option value="HUN">Hungary (HUN) — HUF</option>
           <option value="ISR">Israel (ISR) — ILS</option>
-          <option value="JPN">Japan (JPN) — JPY</option>
           <option value="KAZ">Kazakhstan (KAZ) — KZT</option>
-          <option value="KWT">Kuwait (KWT) — KWD</option>
+          <option value="XKX">Kosovo (XKX) — EUR</option>
           <option value="LVA">Latvia (LVA) — EUR</option>
           <option value="LTU">Lithuania (LTU) — EUR</option>
           <option value="MKD">North Macedonia (MKD) — MKD</option>
           <option value="NOR">Norway (NOR) — NOK</option>
           <option value="POL">Poland (POL) — PLN</option>
-          <option value="QAT">Qatar (QAT) — QAR</option>
-          <option value="SAU">Saudi Arabia (SAU) — SAR</option>
           <option value="SRB">Serbia (SRB) — RSD</option>
           <option value="SVN">Slovenia (SVN) — EUR</option>
           <option value="SVK">Slovakia (SVK) — EUR</option>
-          <option value="ESP">Spain (ESP) — EUR</option>
           <option value="SWE">Sweden (SWE) — SEK</option>
-          <option value="UZB">Uzbekistan (UZB) — UZS</option>
         </select>
       </div>
     </div>
@@ -199,15 +193,15 @@ code.zero { background: #F3E5F5; color: #6A1B9A; }
 <script>
 // ── Country → currency ────────────────────────────────────────────────────────
 const COUNTRY_CURRENCY = {
-  AUT:'EUR',ALB:'ALL',AZE:'AZN',BIH:'BAM',BGR:'BGN',HRV:'EUR',CYP:'EUR',
+  AUT:'EUR',ALB:'ALL',AZE:'AZN',BGR:'EUR',HRV:'EUR',CYP:'EUR',
   CZE:'CZK',DNK:'DKK',EST:'EUR',FIN:'EUR',GEO:'GEL',DEU:'EUR',GRC:'EUR',
-  HUN:'HUF',ISR:'ILS',JPN:'JPY',KAZ:'KZT',KWT:'KWD',LVA:'EUR',LTU:'EUR',
-  MKD:'MKD',NOR:'NOK',POL:'PLN',QAT:'QAR',SAU:'SAR',SRB:'RSD',SVN:'EUR',
-  SVK:'EUR',ESP:'EUR',SWE:'SEK',UZB:'UZS'
+  HUN:'HUF',ISR:'ILS',KAZ:'KZT',LVA:'EUR',LTU:'EUR',
+  MKD:'MKD',NOR:'NOK',POL:'PLN',SRB:'RSD',SVN:'EUR',
+  SVK:'EUR',SWE:'SEK',XKX:'EUR'
 };
 
 // Countries where flat fee transaction fee is live
-const FLAT_FEE_TXN_COUNTRIES = ['DEU','ALB','SRB'];
+const FLAT_FEE_TXN_COUNTRIES = ['DEU','ALB','SRB','AUT','BGR','XKX'];
 // Countries with card commission
 const CARD_COMMISSION_COUNTRIES = ['HUN','EST','LVA','LTU'];
 
@@ -312,7 +306,9 @@ const TYPES = {
     label: 'Transaction fee / Platform fee (% based fee ONLY)',
     group: 'standard',
     venueLevel: true,
-    notes: 'Supported at merchant and venue level. % based fee only. If you need to switch the monetization model (e.g. from flat fee to %), use "Transaction fee — switching to % based fee" under Multiple monetization models instead.',
+    countryExclusion: CARD_COMMISSION_COUNTRIES,
+    countryExclusionMsg: 'Transaction fee is not used in HUN, EST, LVA, LTU — these markets use "Card commission fee" instead.',
+    notes: 'Supported at merchant and venue level. % based fee only. Not used in HUN, EST, LVA, LTU (use Card commission fee there instead). If you need to switch the monetization model (e.g. from flat fee to %), use "Transaction fee — switching to % based fee" under Multiple monetization models instead.',
     docSection: 'Transaction fee/ Platform fee (for % based fee ONLY)',
     cols: [
       {col:'header.entity_id', label:'Entity ID', type:'id'},
@@ -324,13 +320,13 @@ const TYPES = {
     group: 'standard',
     venueLevel: true,
     countryRestriction: FLAT_FEE_TXN_COUNTRIES,
-    countryRestrictionMsg: 'Flat fee / OTF transaction fee is only live in DEU, ALB, SRB. Do not use for other countries.',
-    notes: 'DEU, ALB, SRB only. Use this when setting a flat (one-time) transaction fee. 3-column format — no % column needed. Amount must be in minor units (e.g. €0.49 = 49, €1.25 = 125). Currency must match the country.',
+    countryRestrictionMsg: 'Flat fee / OTF transaction fee is live in DEU, ALB, SRB, AUT, BGR (XKX launching soon). Do not use for other countries.',
+    notes: 'DEU, ALB, SRB, AUT, BGR only (XKX launching soon). Use this when setting a flat (one-time) transaction fee. 3-column format — no % column needed. Amount must be in minor units (e.g. €0.49 = 49, €1.25 = 125). Currency must match the country.',
     docSection: 'Transaction fee flat fee (OTF)',
     cols: [
       {col:'header.entity_id', label:'Entity ID', type:'id'},
       {col:'payload.commissions.flatFeeCommissions.transaction_fee.amount_minor_units', label:'Flat fee in minor units — e.g. €0.49 = 49, €1.25 = 125', type:'minorUnits'},
-      {col:'payload.commissions.flatFeeCommissions.transaction_fee.currency_code', label:'Currency code matching country — EUR for DEU, ALL for ALB, RSD for SRB', type:'currency'},
+      {col:'payload.commissions.flatFeeCommissions.transaction_fee.currency_code', label:'Currency code matching country — EUR for DEU/AUT/XKX/BGR, ALL for ALB, RSD for SRB', type:'currency'},
     ]
   },
   vat_flag: {
@@ -354,7 +350,7 @@ const TYPES = {
     group: 'multimodel',
     venueLevel: true,
     countryRestriction: FLAT_FEE_TXN_COUNTRIES,
-    countryRestrictionMsg: 'Flat fee transaction fee is only live in DEU, ALB, SRB.',
+    countryRestrictionMsg: 'Flat fee transaction fee is live in DEU, ALB, SRB, AUT, BGR (XKX launching soon).',
     notes: 'Use this when switching the transaction fee from % based to flat fee, OR when the entity is already on flat fee and you are updating the flat fee amount. The % column must be included and set to 0.',
     docSection: 'Commissions with multiple monetization models',
     docLink: 'https://woltwide.atlassian.net/wiki/spaces/FCG/pages/4638573421',
@@ -369,7 +365,9 @@ const TYPES = {
     label: 'Transaction fee — switching to % based fee',
     group: 'multimodel',
     venueLevel: true,
-    notes: 'Use this when switching the transaction fee from flat fee to % based, OR when the entity is already on % and you are updating the rate. The flat fee columns must be included and both set to 0.',
+    countryExclusion: CARD_COMMISSION_COUNTRIES,
+    countryExclusionMsg: 'Transaction fee is not used in HUN, EST, LVA, LTU — these markets use "Card commission fee" instead.',
+    notes: 'Use this when switching the transaction fee from flat fee to % based, OR when the entity is already on % and you are updating the rate. The flat fee columns must be included and both set to 0. Not used in HUN, EST, LVA, LTU.',
     docSection: 'Commissions with multiple monetization models',
     docLink: 'https://woltwide.atlassian.net/wiki/spaces/FCG/pages/4638573421',
     cols: [
@@ -423,9 +421,11 @@ function updateInfo() {
   const currency = country ? COUNTRY_CURRENCY[country] : null;
   const isMultiModel = def.group === 'multimodel';
   const countryBlocked = def.countryRestriction && country && !def.countryRestriction.includes(country);
+  const countryExcluded = def.countryExclusion && country && def.countryExclusion.includes(country);
+  const countryInvalid = countryBlocked || countryExcluded;
 
   // Info box
-  let cls = countryBlocked ? 'info-box info-error' : isMultiModel ? 'info-box info-multimodel' : 'info-box info-standard';
+  let cls = countryInvalid ? 'info-box info-error' : isMultiModel ? 'info-box info-multimodel' : 'info-box info-standard';
   let html = `<strong>${def.label}</strong>`;
   html += `<div class="info-row">`;
   html += def.venueLevel
@@ -434,13 +434,20 @@ function updateInfo() {
   if (def.countryRestriction) {
     html += ` <span class="tag tag-country">🌍 ${def.countryRestriction.join(', ')} only</span>`;
   }
+  if (def.countryExclusion) {
+    html += ` <span class="tag tag-country">🚫 Not used in ${def.countryExclusion.join(', ')}</span>`;
+  }
   html += `</div>`;
   html += `<div class="info-row" style="margin-top:5px">${def.notes}</div>`;
 
   if (countryBlocked) {
     html += `<div class="info-row" style="color:#C62828;font-weight:600;margin-top:6px;">🚫 ${def.countryRestrictionMsg}</div>`;
   }
-  if (currency) {
+  if (countryExcluded) {
+    html += `<div class="info-row" style="color:#C62828;font-weight:600;margin-top:6px;">🚫 ${def.countryExclusionMsg}</div>`;
+  }
+  const hasCurrencyCol = def.cols.some(c => c.type === 'currency');
+  if (currency && hasCurrencyCol) {
     html += `<div class="info-row" style="margin-top:6px;">💱 Expected currency for ${country}: <strong>${currency}</strong></div>`;
   }
   if (isMultiModel) {
@@ -506,22 +513,68 @@ function onPaste() {
 
 // ── CSV parse ─────────────────────────────────────────────────────────────────
 function parseCSV(text) {
-  const lines = text.trim().split('\n').map(l => l.replace(/\r$/,''));
-  if (lines.length < 2) return {headers:[], rows:[]};
-  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
-  const rows = lines.slice(1).filter(l => l.trim()).map(line => {
-    const vals = []; let cur = '', inQ = false;
+  // Deliberately NOT calling text.trim() here: trim() silently strips leading/trailing
+  // whitespace-class characters (including BOMs and NBSPs) from the whole file, which would
+  // erase a stray character on the very first header or the very last value before we even get
+  // a chance to detect it — the exact same blind spot the header-whitespace bug came from, just
+  // one level up. Instead we only drop genuinely empty trailing lines (e.g. the lone newline
+  // most editors add at end-of-file), leaving real content at the edges untouched.
+  let lines = text.split('\n').map(l => l.replace(/\r$/,''));
+  while (lines.length && lines[lines.length-1] === '') lines.pop();
+  if (lines.length < 2) return {headers:[], rawHeaders:[], rows:[], rawRows:[]};
+  const rawHeaders = lines[0].split(',');
+  const headers = rawHeaders.map(h => h.trim().replace(/^"|"$/g,''));
+  const rows = [], rawRows = [];
+  lines.slice(1).filter(l => l.trim()).forEach(line => {
+    const rawVals = []; let cur = '', inQ = false;
     for (const ch of line) {
       if (ch==='"') { inQ=!inQ; }
-      else if (ch===',' && !inQ) { vals.push(cur.trim()); cur=''; }
+      else if (ch===',' && !inQ) { rawVals.push(cur); cur=''; }
       else cur += ch;
     }
-    vals.push(cur.trim());
-    const row = {};
-    headers.forEach((h,i) => row[h] = (vals[i]||'').replace(/^"|"$/g,''));
-    return row;
+    rawVals.push(cur);
+    const row = {}, rawRow = {};
+    headers.forEach((h,i) => {
+      const raw = rawVals[i]||'';
+      row[h] = raw.trim().replace(/^"|"$/g,'');
+      rawRow[h] = raw;
+    });
+    rows.push(row);
+    rawRows.push(rawRow);
   });
-  return {headers, rows};
+  return {headers, rawHeaders, rows, rawRows};
+}
+
+// Named invisible/whitespace characters worth calling out explicitly. A blank gap could be a
+// plain space, or it could be a Google Sheets non-breaking space, an Excel-exported BOM, etc.
+// — characters that look identical in a text box but behave differently to a parser.
+const WHITESPACE_NAMES = {
+  ' ': 'space', '\t': 'tab', '\n': 'newline', '\r': 'carriage return',
+  '\u00A0': 'non-breaking space', '\uFEFF': 'BOM (zero-width no-break space)',
+  '\u2003': 'em space', '\u2002': 'en space', '\u3000': 'ideographic space',
+  '\u2028': 'line separator', '\u202F': 'narrow no-break space'
+};
+function describeChar(ch) {
+  return WHITESPACE_NAMES[ch] || `U+${ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0')}`;
+}
+function describeRun(run) {
+  const names = [...new Set([...run].map(describeChar))];
+  return run.length > 1 ? `${run.length} ${names.join('/')} char${run.length!==1?'s':''}` : names[0];
+}
+
+// Core generic check: does this raw string carry whitespace (of ANY kind .trim() recognizes —
+// this covers regular spaces/tabs as well as invisible characters like NBSPs and BOMs) that
+// would silently disappear the moment something calls .trim() on it? If so, describe it and
+// render a visible version (dots stand in for the stray characters) so it's legible in the UI.
+function findStrayWhitespace(raw) {
+  const lead = raw.match(/^\s+/);
+  const trail = raw.match(/\s+$/);
+  if (!lead && !trail) return null;
+  const parts = [];
+  if (lead) parts.push(`leading ${describeRun(lead[0])}`);
+  if (trail) parts.push(`trailing ${describeRun(trail[0])}`);
+  const revealed = raw.replace(/^\s+/, m => '·'.repeat(m.length)).replace(/\s+$/, m => '·'.repeat(m.length));
+  return {description: parts.join(' and '), revealed};
 }
 
 // ── Value validation ──────────────────────────────────────────────────────────
@@ -565,14 +618,37 @@ function runCheck() {
   if (!typeKey || !country || !csvContent) return;
 
   const def = TYPES[typeKey];
-  const {headers, rows} = parseCSV(csvContent);
+  const {headers, rawHeaders, rows, rawRows} = parseCSV(csvContent);
   const expectedCurrency = COUNTRY_CURRENCY[country];
   const issues = [];
 
-  // 0. Country restriction
+  // 0a. Stray whitespace in headers
+  // This checker trims headers before matching them against the expected column list, but the
+  // actual upload backend (FDR) parses headers verbatim — it does NOT trim. A header with a
+  // leading/trailing space (or NBSP, or an Excel BOM, etc.) still looks "correct" here but won't
+  // map to the expected field there, so that column is silently dropped (e.g. currency_code ends
+  // up empty). Flag it instead of normalizing it away, so files that would break FDR don't pass.
+  rawHeaders.forEach((raw, i) => {
+    const stray = findStrayWhitespace(raw);
+    if (stray) {
+      issues.push({level:'error', code:'WHITESPACE_IN_HEADER',
+        msg:`Column ${i+1} header has ${stray.description}: "${stray.revealed}" (dots mark it). `+
+            `This looks fine here because headers are trimmed for comparison, but the upload backend `+
+            `parses headers verbatim — it won't recognize this column and will silently drop it `+
+            `(this is exactly what caused the AUT currency_code issue). Remove it from the source file before uploading.`});
+    }
+  });
+
+  // 0b. Country restriction (allow-list: only valid in these countries)
   if (def.countryRestriction && !def.countryRestriction.includes(country)) {
     issues.push({level:'error', code:'COUNTRY_NOT_SUPPORTED',
       msg:`${def.label} is not supported in ${country}. Only available in: ${def.countryRestriction.join(', ')}.`});
+  }
+
+  // 0c. Country exclusion (block-list: valid everywhere EXCEPT these countries)
+  if (def.countryExclusion && def.countryExclusion.includes(country)) {
+    issues.push({level:'error', code:'COUNTRY_NOT_SUPPORTED',
+      msg:`${def.label} is not used in ${country}. ${def.countryExclusionMsg}`});
   }
 
   // 1. Missing required columns
@@ -597,6 +673,18 @@ function runCheck() {
 
     def.cols.forEach(colDef => {
       if (!headers.includes(colDef.col)) return;
+
+      // Stray whitespace in the value itself — same failure mode as the header check above,
+      // just applied per-cell. A value is trimmed before we validate it below, so without this
+      // check a currency code like "EUR " or " EUR" would look perfectly valid here.
+      const rawVal = (rawRows[idx] && rawRows[idx][colDef.col]) || '';
+      const stray = findStrayWhitespace(rawVal);
+      if (stray) {
+        issues.push({level:'error', code:'WHITESPACE_IN_VALUE',
+          msg:`Row ${rowNum}, "${colDef.col}": value has ${stray.description}: "${stray.revealed}" (dots mark it). `+
+              `This checker trims values before validating them, but the upload backend may parse them verbatim — treat this the same as a header whitespace issue and clean the source file.`});
+      }
+
       validateVal(row[colDef.col], colDef.type).forEach(e => {
         issues.push({level:'error', code:'INVALID_VALUE',
           msg:`Row ${rowNum}, "${colDef.col}": ${e}`});
